@@ -1,0 +1,27 @@
+/* Importation de Tailwind */
+@import "tailwindcss";
+
+/* Configuration de la Charte Graphique HISWACA */
+@theme {
+  /* Définition des couleurs personnalisées */
+  --color-hiswaca-green: #4ba32b;
+  --color-hiswaca-yellow: #eee40d;
+  --color-hiswaca-red: #e41e12;
+
+  /* Définition des polices (si vous les avez, sinon fallback) */
+  --font-display: "Urban Shadow", sans-serif;
+  --font-sans: "Myriad Pro", system-ui, sans-serif;
+}
+
+/* Ajout des polices personnalisées (A mettre dans le dossier public/fonts si vous avez les fichiers) */
+@font-face {
+  font-family: "Urban Shadow";
+  src: url("/fonts/UrbanShadow.otf") format("opentype");
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Myriad Pro";
+  src: url("/fonts/MyriadPro-Regular.otf") format("opentype");
+  font-weight: normal;
+}
