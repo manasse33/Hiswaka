@@ -61,6 +61,8 @@ const Layout = ({ children }) => {
              <Link to="/donnees" className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2 rounded-lg font-bold text-sm hover:bg-emerald-700 transition shadow-lg">
                 <Database size={16} /> Portail
              </Link>
+             <Link to="/login" className="text-sm font-medium text-gray-500 hover:text-emerald-700">Connexion</Link>
+             <Link to="/demande" className="text-sm font-medium text-gray-500 hover:text-emerald-700">Demande</Link>
           </div>
 
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 text-gray-600">
