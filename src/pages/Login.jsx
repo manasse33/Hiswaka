@@ -1,113 +1,99 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, Mail, Lock, Eye, EyeOff, MapPin } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
+import { Lock, ArrowRight, ShieldCheck, Loader2, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-export default function LoginPage() {
-  const { t } = useTranslation();
-  const { login } = useAuth();
-  const navigate = useNavigate();
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null); // <== NOUVEAU: État pour l'erreur
+  const [loading, setLoading] = useState(false); // <== NOUVEAU: État de chargement
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => { // <== MODIFIÉ: Rendre la fonction asynchrone
     e.preventDefault();
+    setError(null);
     setLoading(true);
-    setError('');
-    
-    try {
-      await login(email, password);
-      navigate('/admin');
-    } catch (err) {
-      setError(t('auth.loginError'));
-    } finally {
-      setLoading(false);
+
+    // MODIFIÉ: Attendre le résultat de la fonction login
+    const result = await login(email, password); 
+
+    if (result.success) {
+      // Connexion réussie, redirection
+      navigate('/donnees'); 
+    } else {
+      // Échec de la connexion, afficher l'erreur
+      setError(result.error || "Une erreur inattendue est survenue.");
     }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#26aa7e] via-[#1f8865] to-[#18664c] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-4">
-            <MapPin size={40} className="text-[#ffc107]" />
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">AdminLocator CG</h1>
-          <p className="text-white/80">Panneau d'administration</p>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Fond décoratif */}
+      <div className="absolute inset-0 z-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+      
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-gray-100 p-8 relative z-10 animate-in fade-in zoom-in duration-300">
+        <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full mx-auto flex items-center justify-center mb-4 border-4 border-emerald-50">
+                <Lock className="text-emerald-700" size={28} />
+            </div>
+            <h2 className="text-2xl font-extrabold text-gray-900">Accès HISWACA Pro</h2>
+            <p className="text-sm text-gray-500 mt-1">Connectez-vous pour accéder aux données <strong className="text-amber-600">RESTRICTED</strong>.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-8 animate-slide-in-right">
-          <h2 className="text-2xl font-bold text-[#212529] mb-6 flex items-center gap-2">
-            <LogIn size={28} className="text-[#26aa7e]" />
-            {t('auth.login')}
-          </h2>
-
-          {error && (
-            <div className="mb-6 p-4 bg-[#fee] border border-[#fcc] rounded-xl text-[#e74c3c] text-sm">
-              {error}
+        {/* NOUVEAU: Affichage de l'erreur */}
+        {error && (
+            <div className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 mb-4 flex items-center gap-2 rounded-lg" role="alert">
+                <XCircle size={20} className="flex-shrink-0" />
+                <p className="font-medium text-sm">Échec de la connexion :</p>
+                <p className="text-sm flex-grow">{error}</p>
             </div>
-          )}
-
-          <div className="space-y-4">
+        )}
+        
+        <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-[#495057] mb-2">
-                {t('auth.email')}
-              </label>
-              <div className="relative">
-                <Mail size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6c757d]" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-[#e9ecef] rounded-xl focus:border-[#26aa7e] focus:outline-none transition-all"
-                  placeholder="admin@example.com"
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email Institutionnel</label>
+                <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="ex: direction@ins.cg"
+                    required
                 />
-              </div>
             </div>
-
             <div>
-              <label className="block text-sm font-semibold text-[#495057] mb-2">
-                {t('auth.password')}
-              </label>
-              <div className="relative">
-                <Lock size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#6c757d]" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-3 border-2 border-[#e9ecef] rounded-xl focus:border-[#26aa7e] focus:outline-none transition-all"
-                  placeholder="••••••••"
+                <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                    placeholder="••••••••"
+                    required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#6c757d] hover:text-[#26aa7e] transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
             </div>
 
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !email || !password}
-              className="w-full btn-primary mt-6 disabled:opacity-50"
-            >
-              {loading ? t('common.loading') : t('auth.loginButton')}
+            <button type="submit" disabled={loading} className="w-full bg-emerald-800 text-white font-bold py-3 rounded-lg hover:bg-emerald-900 transition flex items-center justify-center gap-2">
+                {loading ? <Loader2 className="animate-spin" size={18} /> : <>Connexion Sécurisée <ArrowRight size={18}/></>}
             </button>
-          </div>
-        </div>
+        </form>
 
-        <div className="text-center mt-6">
-          <a href="/" className="text-white hover:text-[#ffc107] transition-colors font-medium">
-            ← Retour à l'accueil
-          </a>
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs text-emerald-700 font-medium bg-emerald-50 py-2 rounded">
+                <ShieldCheck size={14} className="text-emerald-600" /> Sécurité certifiée : Connexion HTTPS/JWT.
+            </div>
+            <p className="mt-4 text-sm text-gray-600">
+                Pas encore de compte ? <Link to="/register" className="font-semibold text-emerald-700 hover:text-emerald-900 underline">Créer un compte</Link>
+            </p>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Login;
